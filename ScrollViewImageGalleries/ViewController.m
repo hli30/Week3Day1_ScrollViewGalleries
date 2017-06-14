@@ -16,6 +16,7 @@
 @property (nonatomic) UIImageView *view2;
 @property (nonatomic) UIImageView *view3;
 
+@property (nonatomic) UIPageControl *pageControl;
 
 @end
 
@@ -23,27 +24,16 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
     [self setupImage];
-    
-    UITapGestureRecognizer *tapGesture1 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
-    UITapGestureRecognizer *tapGesture2 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
-    UITapGestureRecognizer *tapGesture3 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
-    
-    [self.view1 addGestureRecognizer:tapGesture1];
-    [self.view2 addGestureRecognizer:tapGesture2];
-    [self.view3 addGestureRecognizer:tapGesture3];
-
-    
-//    UIPageControl *page = [[UIPageControl alloc] initWithFrame:self.view.frame];
+    [self setupPageControl];
+    [self setupGestures];
 }
 
 -(void)viewTapped:(UITapGestureRecognizer *)sender {
     if ([sender.view isKindOfClass:[UIImageView class]]) {
         UIImageView * imageView = (UIImageView *)sender.view;
         UIImage * image = imageView.image;
-        [self performSegueWithIdentifier:@"showDetail"
-                                  sender:image];
+        [self performSegueWithIdentifier:@"showDetail" sender:image];
     }
 }
 
@@ -51,14 +41,19 @@
     if ([segue.identifier isEqualToString:@"showDetail"]) {
         UIImage * image = (UIImage *)sender;
         SecondViewController * viewController = segue.destinationViewController;
-        viewController.pictureView = image;
+        viewController.picture = image;
     }
 }
 
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView{
-    
+    CGFloat pageWidth = self.scrollView.frame.size.width;
+    float fractionalPage = self.scrollView.contentOffset.x / pageWidth;
+    NSInteger page = lround(fractionalPage);
+    self.pageControl.currentPage = page;
 }
 
+
+#pragma mark -- Setup
 
 - (void)setupImage{
     //setup image 1
@@ -163,6 +158,7 @@
 
     [self.scrollView addSubview:imageView3];
 
+    self.view3 = imageView3;
     
     NSLayoutConstraint *image3TopConstraint = [NSLayoutConstraint constraintWithItem:imageView3
                                                                            attribute:NSLayoutAttributeTop
@@ -205,8 +201,64 @@
                                                                              multiplier:1.0
                                                                                constant:0.0];
     image3HeightConstraint.active = YES;
-    self.view3 = imageView3;
+}
 
+-(void)setupPageControl{
+    UIPageControl *pageControl = [[UIPageControl alloc] initWithFrame:CGRectZero];
+    pageControl.pageIndicatorTintColor = [UIColor grayColor];
+    pageControl.currentPageIndicatorTintColor = [UIColor blackColor];
+    pageControl.currentPage = 1;
+    pageControl.numberOfPages = 3;
+    pageControl.translatesAutoresizingMaskIntoConstraints = NO;
+    
+    self.pageControl = pageControl;
+    
+    [self.view addSubview:pageControl];
+    
+    NSLayoutConstraint *pageControlBottomConstraint = [NSLayoutConstraint constraintWithItem:pageControl
+                                                                                attribute:NSLayoutAttributeBottom
+                                                                                relatedBy:NSLayoutRelationEqual
+                                                                                   toItem:self.scrollView
+                                                                                attribute:NSLayoutAttributeBottom
+                                                                               multiplier:1.0
+                                                                                 constant:0.0];
+    pageControlBottomConstraint.active = YES;
+    
+    NSLayoutConstraint *pageControlLeftConstraint = [NSLayoutConstraint constraintWithItem:pageControl
+                                                                                 attribute:NSLayoutAttributeLeading
+                                                                                 relatedBy:NSLayoutRelationEqual
+                                                                                    toItem:self.scrollView
+                                                                                 attribute:NSLayoutAttributeLeading
+                                                                                multiplier:1.0
+                                                                                  constant:0.0];
+    pageControlLeftConstraint.active = YES;
+    
+    NSLayoutConstraint *pageControlWidthConstraint = [NSLayoutConstraint constraintWithItem:pageControl
+                                                                                  attribute:NSLayoutAttributeWidth
+                                                                                  relatedBy:NSLayoutRelationEqual
+                                                                                     toItem:self.scrollView                                                                                attribute:NSLayoutAttributeWidth
+                                                                                 multiplier:1.0
+                                                                                   constant:0];
+    pageControlWidthConstraint.active = YES;
+    
+    NSLayoutConstraint *pageControlHeightConstraint = [NSLayoutConstraint constraintWithItem:pageControl
+                                                                                   attribute:NSLayoutAttributeHeight
+                                                                                   relatedBy:NSLayoutRelationEqual
+                                                                                      toItem:nil
+                                                                                   attribute:NSLayoutAttributeNotAnAttribute
+                                                                                  multiplier:1.0
+                                                                                    constant:100];
+    pageControlHeightConstraint.active = YES;
+}
+
+-(void)setupGestures{
+    UITapGestureRecognizer *tapGesture1 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
+    UITapGestureRecognizer *tapGesture2 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
+    UITapGestureRecognizer *tapGesture3 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
+    
+    [self.view1 addGestureRecognizer:tapGesture1];
+    [self.view2 addGestureRecognizer:tapGesture2];
+    [self.view3 addGestureRecognizer:tapGesture3];
 }
 
 @end

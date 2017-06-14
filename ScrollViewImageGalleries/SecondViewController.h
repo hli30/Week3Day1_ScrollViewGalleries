@@ -10,6 +10,6 @@
 
 @interface SecondViewController : UIViewController
 
-@property (nonatomic) UIImage *pictureView;
+@property (nonatomic) UIImage *picture;
 
 @end
